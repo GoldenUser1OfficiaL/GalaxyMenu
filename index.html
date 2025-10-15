@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GalaxyLoader Menu</title>
+<style>
+  body {
+    background-color: black;
+    color: white;
+    font-family: monospace;
+    font-size: 28px;
+    margin: 0;
+    padding: 20px;
+  }
+
+  #menu, #credits, #codeScreen {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+  }
+
+  #menu.active, #credits.active, #codeScreen.active {
+    display: flex;
+  }
+
+  .item {
+    white-space: pre;
+  }
+
+  .selected::after {
+    content: " <";
+  }
+
+  #credits {
+    font-size: 22px;
+    gap: 14px;
+  }
+
+  #error {
+    color: red;
+    font-size: 20px;
+    margin-top: 10px;
+  }
+
+  #codeScreen span#cursor {
+    animation: blink 1s step-start infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+</style>
+</head>
+<body>
+  <div id="menu" class="active">
+    <div class="item selected">GalaxyLoader</div>
+    <div class="item">Credits</div>
+    <div id="error"></div>
+  </div>
+
+  <div id="credits">
+    <div>Credits to Goldenuser1</div>
+    <div>Hold Shift+Z to exit</div>
+  </div>
+
+  <div id="codeScreen">
+    <div>whats the code for this</div>
+    <div><span id="inputText"></span><span id="cursor">|</span></div>
+    <div id="codeError" style="color:red;margin-top:10px;"></div>
+  </div>
+
+  <script>
+    const menu = document.getElementById('menu');
+    const credits = document.getElementById('credits');
+    const codeScreen = document.getElementById('codeScreen');
+    const items = document.querySelectorAll('.item');
+    const errorText = document.getElementById('error');
+    const inputText = document.getElementById('inputText');
+    const codeError = document.getElementById('codeError');
+    let selected = 0;
+    let inCredits = false;
+    let enteringCode = false;
+    let currentInput = "";
+
+    function updateSelection() {
+      items.forEach((item, i) => {
+        item.classList.toggle('selected', i === selected);
+      });
+    }
+
+    function showMenu() {
+      credits.classList.remove('active');
+      codeScreen.classList.remove('active');
+      menu.classList.add('active');
+      inCredits = false;
+      enteringCode = false;
+      currentInput = "";
+      inputText.textContent = "";
+      errorText.textContent = "";
+      codeError.textContent = "";
+      updateSelection();
+    }
+
+    function showCredits() {
+      menu.classList.remove('active');
+      credits.classList.add('active');
+      inCredits = true;
+    }
+
+    function showCodeScreen() {
+      menu.classList.remove('active');
+      codeScreen.classList.add('active');
+      enteringCode = true;
+      inputText.textContent = "";
+      currentInput = "";
+    }
+
+    document.addEventListener('keydown', e => {
+      if (inCredits) {
+        if (e.key === 'Z' && e.shiftKey) showMenu();
+        return;
+      }
+
+      if (enteringCode) {
+        if (e.key === 'Enter') {
+          if (currentInput === "11292011") {
+            window.location.href = "prox.html";
+          } else {
+            codeError.textContent = "Incorrect code!";
+            currentInput = "";
+            inputText.textContent = "";
+          }
+        } else if (e.key === 'Backspace') {
+          currentInput = currentInput.slice(0, -1);
+          inputText.textContent = currentInput;
+        } else if (/^[0-9]$/.test(e.key)) {
+          currentInput += e.key;
+          inputText.textContent = currentInput;
+        }
+        return;
+      }
+
+      if (e.key === 'ArrowDown') {
+        selected = (selected + 1) % items.length;
+        updateSelection();
+      } else if (e.key === 'ArrowUp') {
+        selected = (selected - 1 + items.length) % items.length;
+        updateSelection();
+      } else if (e.key === 'Enter') {
+        if (selected === 0) showCodeScreen();
+        else if (selected === 1) showCredits();
+      }
+    });
+
+    updateSelection();
+  </script>
+</body>
+</html>
