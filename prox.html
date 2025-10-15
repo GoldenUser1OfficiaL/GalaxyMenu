@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GalaxyMenu++</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+  body.dark-red { background: #4d0000; }
+  body.navy { background: #00004d; }
+  body.dark-orange { background: #4d2600; }
+  body.light-black { background: #1a1a1a; }
+  body.white { background: #ffffff; color: #00000a; }
+
+  body {
+    font-family: 'Orbitron', Arial, sans-serif;
+    background: #00000a;
+    color: #ffffff;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  body.galaxy .stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent url('https://www.transparenttextures.com/patterns/stardust.png') repeat;
+    animation: move-twinkling 200s linear infinite;
+    z-index: -1;
+  }
+
+  body.uploaded::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(6px);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  @keyframes move-twinkling {
+    from { background-position: 0 0; }
+    to { background-position: -10000px 5000px; }
+  }
+
+  h1 {
+    font-size: 3em;
+    margin-bottom: 5px;
+    text-shadow: 0 0 5px #00ffff;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    display: inline-block;
+  }
+
+  h1:hover {
+    color: #00ffff;
+    text-shadow:
+      0 0 10px #00ffff,
+      0 0 20px #00ffff,
+      0 0 40px #00ccff,
+      0 0 60px #0099ff;
+    transform: scale(1.1) rotate(-2deg);
+    animation: pulse 1.2s infinite alternate;
+  }
+
+  @keyframes pulse {
+    from { text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ccff; }
+    to { text-shadow: 0 0 20px #00ffff, 0 0 40px #00ccff, 0 0 60px #0099ff, 0 0 80px #0066ff; }
+  }
+
+  .description {
+    font-size: 1.2em;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #b3d9ff;
+    text-shadow: 0 0 3px #0056b3;
+    z-index: 1;
+    position: relative;
+  }
+
+  .galaxy-button {
+    padding: 12px 20px;
+    font-size: 16px;
+    color: #ffffff;
+    background: rgba(0, 0, 50, 0.5);
+    border: 2px solid #4d4dff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 5px #00ffff, inset 0 0 5px #00ffff;
+    min-width: 120px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .galaxy-button:hover {
+    background: rgba(0, 0, 100, 0.7);
+    border-color: #00ffff;
+    box-shadow: 0 0 10px #00ffff, inset 0 0 10px #00ffff;
+    transform: scale(1.05);
+  }
+
+  .button-container {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .corner-buttons {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 200;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-content {
+    background: #00001f;
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid #4d4dff;
+    box-shadow: 0 0 15px #00ffff;
+    width: 90%;
+    max-width: 520px;
+    text-align: left;
+    position: relative;
+    z-index: 1001;
+  }
+
+  .modal-content h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .modal-content .close-button {
+    float: right;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #ff00ff;
+    cursor: pointer;
+  }
+
+  #bg-options-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  #start-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+
+  #full-menu { display: none; }
+
+  .yellow-btn { background: yellow !important; color: black !important; }
+
+  .settings-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
+  .settings-note { font-size:0.9em; color:#a8d9ff; margin-top:6px; text-shadow:0 0 3px #002e5f; }
+
+  /* storage-banner */
+  #storage-banner {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 2000;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(6px);
+    color: #ffd;
+    display: none;
+    max-width: 320px;
+    font-size: 0.95em;
+  }
+  #storage-banner.warn { background: rgba(255,200,0,0.12); border-color: rgba(255,200,0,0.25); color: #fff200; display: block; }
+  #storage-banner.alert { background: rgba(255,0,0,0.12); border-color: rgba(255,0,0,0.25); color: #ff8888; display:block; }
+
+  /* storage-size small text */
+  #storage-banner small { display:block; opacity:0.9; font-size:0.85em; color:inherit; }
+
+  /* Update modal specific styling */
+  #update-modal .modal-content { max-width: 640px; border-color: #00ff99; box-shadow: 0 0 25px #00ff99; text-align: center; }
+  #update-modal .update-title { font-size: 1.5em; margin-bottom: 10px; color: #00ff99; }
+  #update-modal .update-body { color: #ccffd6; margin-bottom: 12px; }
+
+  /* responsive tweaks */
+  @media (max-width: 600px) {
+    h1 { font-size: 2em; }
+    .modal-content { width: 95%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div id="start-screen">
+  <h1>GalaxyMenu++</h1>
+  <div class="button-container" style="flex-direction:column; gap:15px;">
+    <button class="galaxy-button" id="about-btn">About Me</button>
+    <button class="galaxy-button" id="settings-btn">Settings</button>
+    <button class="galaxy-button" id="start-menu-btn">GalaxyMenu++</button>
+  </div>
+</div>
+
+<!-- FULL MENU -->
+<div id="full-menu">
+  <div class="stars"></div>
+  <p class="description">Version 1.0 (October 2, 2025)</p>
+  <p class="description">Last Updated: October 8, 2025</p>
+  <div class="button-container" id="links-container">
+    <a href="https://writingessayepicguide.lol/en_US/" target="_blank"><button class="galaxy-button">Nebula</button></a>
+    <a href="https://ruff.svennis.ro/" target="_blank"><button class="galaxy-button">Space</button></a>
+    <a href="https://openprocessing.org/sketch/2494133" target="_blank"><button class="galaxy-button">1v1 LoL</button></a>
+    <a href="https://helpmath.piconet.ro/" target="_blank"><button class="galaxy-button">Vapor</button></a>
+    <a href="https://www.www.www.www.152-53-18-128.ip.addr.tools/#home" target="_blank"><button class="galaxy-button">UniUB (best one)</button></a>
+    <a href="http://neal.fun" target="_blank"><button class="galaxy-button">Neal.fun</button></a>
+    <a href="https://www.soundtrap.com/login" target="_blank"><button class="galaxy-button">SoundTrap</button></a>
+    <a href="https://reading-old.q13x.com/" target="_blank"><button class="galaxy-button">Minecraft 1.5.2</button></a>
+    <a href="https://sites.google.com/view/jnrvc-tgrfde-erty-btvrd4et-yuy/home" target="_blank"><button class="galaxy-button">Elite Games</button></a>
+    <a href="https://nb-ga.github.io/games-site/" target="_blank"><button class="galaxy-button">All Games</button></a>
+    <a href="https://science.nasa.gov/solar-system/" target="_blank"><button class="galaxy-button">3D Solar System</button></a>
+    <a href="https://musiclab.chromeexperiments.com/Spectrogram/" target="_blank"><button class="galaxy-button">Spectrogram</button></a>
+    <a href="https://www.google.com/logos/2019/july4th19/r6/july4th19.html?hl=en" target="_blank"><button class="galaxy-button">4th of July Baseball</button></a>
+    <a href="https://scratch.mit.edu/" target="_blank"><button class="galaxy-button">Scratch</button></a>
+    <a href="https://www.blooket.com/" target="_blank"><button class="galaxy-button">Blooket</button></a>
+    <a href="https://kahoot.it/" target="_blank"><button class="galaxy-button">Kahoot</button></a>
+    <a href="https://openprocessing.org/sketch/2742616" target="_blank"><button class="galaxy-button">Exthang3r</button></a>
+  </div>
+
+  <div class="corner-buttons">
+    <button class="galaxy-button" id="background-button">Custom Background</button>
+    <button class="galaxy-button" id="download-button">Download GalaxyMenu++ (V1.0)</button>
+    <button class="galaxy-button" id="back-btn">Back</button>
+  </div>
+</div>
+
+<!-- BACKGROUND MODAL -->
+<div id="background-modal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <span class="close-button">&times;</span>
+    <h2>Change Background</h2>
+    <div id="bg-options-content">
+      <button class="galaxy-button bg-option-button" data-background="default">Black</button>
+      <button class="galaxy-button bg-option-button" data-background="dark-red">Dark Red</button>
+      <button class="galaxy-button bg-option-button" data-background="navy">Navy</button>
+      <button class="galaxy-button bg-option-button" data-background="dark-orange">Dark Orange</button>
+      <button class="galaxy-button bg-option-button" data-background="light-black">Gray</button>
+      <button class="galaxy-button bg-option-button" data-background="white">White</button>
+      <button class="galaxy-button bg-option-button" data-background="galaxy">Galaxy</button>
+      <button class="galaxy-button" id="upload-bg-btn">Upload Background</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="bg-upload-input" accept="image/*" style="display:none" />
+
+<!-- SETTINGS MODAL -->
+<div id="settings-modal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <span class="close-button">&times;</span>
+    <h2>Settings</h2>
+
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div class="settings-row">
+        <button class="galaxy-button" id="restore-data-btn">Restore All Data</button>
+        <button class="galaxy-button" id="remove-link-btn">Remove Link</button>
+      </div>
+
+      <!-- Music controls -->
+      <div class="settings-row">
+        <button class="galaxy-button" id="add-music-btn">Add Music</button>
+        <button class="galaxy-button" id="mute-music-btn">Mute Music</button>
+        <button class="galaxy-button" id="unmute-music-btn">Unmute Music</button>
+        <button class="galaxy-button" id="reset-music-btn">Reset to Default Music</button>
+      </div>
+      <div class="settings-note">Add Music: upload your own MP3; it will replace and save over the default music.</div>
+
+      <!-- hidden file input used for Add Music -->
+      <input type="file" id="music-upload-input" accept="audio/*" style="display:none">
+    </div>
+  </div>
+</div>
+
+<!-- LOADING MODAL -->
+<div id="loading-modal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <h2>killing all data...</h2>
+  </div>
+</div>
+
+<!-- STORAGE ALERT/INFO MODAL -->
+<div id="storage-modal" class="modal" aria-hidden="true">
+  <div class="modal-content" id="storage-modal-content">
+    <span class="close-button">&times;</span>
+    <h2 id="storage-modal-title">Storage Notice</h2>
+    <p id="storage-modal-message"></p>
+    <div style="text-align:center; margin-top:12px;">
+      <button class="galaxy-button" id="storage-modal-ok">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- STORAGE BANNER (top-right) -->
+<div id="storage-banner" role="status" aria-live="polite">
+  <strong id="storage-banner-title"></strong>
+  <small id="storage-banner-size"></small>
+</div>
+
+<!-- UPDATE NOTIFICATION (shows on every page load) -->
+<div id="update-modal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <span class="close-button">&times;</span>
+    <div class="update-title">GalaxyMenu++</div>
+    <div class="update-body" id="update-body">alr</div>
+    <div style="text-align:center; margin-top:8px;">
+      <button class="galaxy-button" id="update-ok">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUDIO -->
+<audio id="bgAudio" autoplay loop></audio>
+<audio id="clickSound" src="https://ia801608.us.archive.org/7/items/select-online-audio-converter.com/Select%20%28online-audio-converter.com%29.mp3"></audio>
+<audio id="hoverSound" src="https://ia600300.us.archive.org/24/items/hover-online-audio-converter.com/Hover%20%28online-audio-converter.com%29.mp3"></audio>
+
+<script>
+/* =========================
+   FULL SCRIPT (complete)
+   - Music & background handling
+   - Storage usage detection + UI warnings
+   - Buttons + sounds
+   - Download that restores settings
+   - Back button to return to the start screen
+   - Update notification modal shown every load
+   - scriptSentences array with 850 sentences generated at runtime
+   ========================= */
+
+/* ---------- Constants & Elements ---------- */
+const defaultMusic = "https://ia801306.us.archive.org/16/items/wii-menu-online-audio-converter.com/Wii%20menu%20%28online-audio-converter.com%29.mp3";
+const bgAudio = document.getElementById("bgAudio");
+const addMusicBtn = document.getElementById("add-music-btn");
+const muteMusicBtn = document.getElementById("mute-music-btn");
+const unmuteMusicBtn = document.getElementById("unmute-music-btn");
+const resetMusicBtn = document.getElementById("reset-music-btn");
+const musicUploadInput = document.getElementById("music-upload-input");
+const bgUploadInput = document.getElementById("bg-upload-input");
+
+const startScreen = document.getElementById('start-screen');
+const fullMenu = document.getElementById('full-menu');
+const aboutBtn = document.getElementById('about-btn');
+const startMenuBtn = document.getElementById('start-menu-btn');
+const backgroundButton = document.getElementById('background-button');
+const backgroundModal = document.getElementById('background-modal');
+const bgOptionButtons = document.querySelectorAll('.bg-option-button');
+const uploadBgBtn = document.getElementById('upload-bg-btn');
+const downloadButton = document.getElementById('download-button');
+const settingsBtn = document.getElementById('settings-btn');
+const settingsModal = document.getElementById('settings-modal');
+const loadingModal = document.getElementById('loading-modal');
+const restoreDataBtn = document.getElementById('restore-data-btn');
+const removeLinkBtn = document.getElementById('remove-link-btn');
+
+const backBtn = document.getElementById('back-btn');
+
+const clickAudio = document.getElementById('clickSound');
+const hoverAudio = document.getElementById('hoverSound');
+
+const storageBanner = document.getElementById('storage-banner');
+const storageBannerTitle = document.getElementById('storage-banner-title');
+const storageBannerSize = document.getElementById('storage-banner-size');
+const storageModal = document.getElementById('storage-modal');
+const storageModalTitle = document.getElementById('storage-modal-title');
+const storageModalMessage = document.getElementById('storage-modal-message');
+const storageModalOk = document.getElementById('storage-modal-ok');
+
+const updateModal = document.getElementById('update-modal');
+const updateOk = document.getElementById('update-ok');
+const updateClose = updateModal.querySelector('.close-button');
+const updateBody = document.getElementById('update-body');
+
+/* ---------- Utilities: estimate localStorage size ---------- */
+/*
+  We estimate bytes by summing the UTF-16 length of keys+values (2 bytes per char),
+  then convert to MB. This is an estimate but useful to warn the user.
+*/
+function getLocalStorageBytes() {
+  let total = 0;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      const value = localStorage.getItem(key);
+      if (key) total += key.length * 2;
+      if (value) total += value.length * 2;
+    }
+  } catch (err) {
+    // Access errors — return 0
+    console.warn("Could not compute localStorage size:", err);
+    return 0;
+  }
+  return total;
+}
+function bytesToMB(bytes) { return bytes / (1024 * 1024); }
+function formatMB(mb) {
+  return mb < 1 ? (mb*1024).toFixed(1) + " KB" : mb.toFixed(2) + " MB";
+}
+
+/* Storage thresholds (as requested)
+   - WARNING when almost at 25MB (I use >= 20 MB)
+   - ALERT when >= 25MB
+*/
+const WARNING_MB = 20; // almost at 25MB
+const ALERT_MB = 25;   // reached or exceeded 25MB
+
+/* ---------- Storage UI handling ---------- */
+function showStorageBanner(type, sizeMB) {
+  if (!storageBanner) return;
+  storageBanner.classList.remove('warn','alert');
+  if (type === 'warn') storageBanner.classList.add('warn');
+  if (type === 'alert') storageBanner.classList.add('alert');
+  storageBannerTitle.textContent = (type === 'alert') ? "ALERT! Storage limit reached." : "WARNING! Storage is almost full.";
+  storageBannerSize.textContent = "Current usage: " + formatMB(sizeMB) + " (" + (Math.round(sizeMB * 100) / 100) + " MB)";
+  storageBanner.style.display = 'block';
+}
+
+function hideStorageBanner() {
+  if (storageBanner) storageBanner.style.display = 'none';
+}
+
+/* Storage modal for more prominent messages */
+function showStorageModal(title, message) {
+  storageModalTitle.textContent = title;
+  storageModalMessage.textContent = message;
+  storageModal.style.display = 'flex';
+  storageModal.setAttribute('aria-hidden', 'false');
+}
+function hideStorageModal() {
+  storageModal.style.display = 'none';
+  storageModal.setAttribute('aria-hidden', 'true');
+}
+
+/* ---------- Main storage check function ---------- */
+function checkStorageUsage(showAlerts = true) {
+  const bytes = getLocalStorageBytes();
+  const mb = bytesToMB(bytes);
+  // update banner or modal
+  if (mb >= ALERT_MB) {
+    // reached or over 25MB
+    showStorageBanner('alert', mb);
+    if (showAlerts) {
+      showStorageModal("ALERT! You reached 25MB.", "ALERT! You reached 25MB. Your current stuff will not be saved.");
+    }
+    return {status: 'alert', sizeMB: mb};
+  } else if (mb >= WARNING_MB) {
+    showStorageBanner('warn', mb);
+    if (showAlerts) {
+      showStorageModal("WARNING! Storage near limit", "WARNING! This storage is almost at 25MB reaching its limit. If you go over 1GB, everything will not be saved.");
+    }
+    return {status: 'warn', sizeMB: mb};
+  } else {
+    hideStorageBanner();
+    // small banner could show usage if you want; currently hiding if not warning/alert
+    return {status: 'ok', sizeMB: mb};
+  }
+}
+
+/* When user clicks OK on storage modal */
+storageModalOk.addEventListener('click', () => {
+  hideStorageModal();
+});
+/* Allow close button to close modals */
+document.querySelectorAll('.modal .close-button').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const modal = e.target.closest('.modal');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+    }
+  });
+});
+
+/* Click outside modals to close */
+window.addEventListener('click', (e) => {
+  document.querySelectorAll('.modal').forEach(modal => {
+    if (e.target === modal) {
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+    }
+  });
+});
+
+/* ---------- Music handling (with storage checks) ---------- */
+let savedCustomMusic = null;
+try { savedCustomMusic = localStorage.getItem("customMusic") || null; } catch(e){ savedCustomMusic = null; }
+
+function loadInitialMusic() {
+  try {
+    if (savedCustomMusic) bgAudio.src = savedCustomMusic;
+    else bgAudio.src = defaultMusic;
+    bgAudio.play().catch(()=>{});
+  } catch (err) {
+    console.error("Error loading initial music:", err);
+    bgAudio.src = defaultMusic;
+  }
+}
+loadInitialMusic();
+
+muteMusicBtn.addEventListener("click", () => {
+  try { bgAudio.pause(); } catch(e) {}
+});
+unmuteMusicBtn.addEventListener("click", () => {
+  try { bgAudio.play().catch(()=>{}); } catch(e) {}
+});
+
+addMusicBtn.addEventListener("click", () => {
+  musicUploadInput.value = ""; // reset
+  musicUploadInput.click();
+});
+
+/* BEFORE saving to localStorage, check if it would push us over the ALERT threshold.
+   If so, refuse to store and show alert. Otherwise store.
+*/
+function attemptSaveCustomMusic(dataUrl) {
+  try {
+    // estimate size if we add this entry
+    const currentBytes = getLocalStorageBytes();
+    const newEntryBytes = (("customMusic".length + (dataUrl ? dataUrl.length : 0)) * 2);
+    const estimatedTotalBytes = currentBytes + newEntryBytes;
+    const estimatedMB = bytesToMB(estimatedTotalBytes);
+
+    if (estimatedMB >= ALERT_MB) {
+      // refuse to write and show alert
+      showStorageBanner('alert', estimatedMB);
+      showStorageModal("ALERT! You reached 25MB.", "ALERT! You reached 25MB. Saving this music would exceed 25MB, so it was not saved. Consider using shorter or compressed audio, or host music externally.");
+      // still set bgAudio for this session (but do not save to localStorage)
+      try {
+        bgAudio.pause();
+        bgAudio.src = dataUrl;
+        bgAudio.load();
+        bgAudio.play().catch(()=>{});
+      } catch(e){}
+      return false;
+    } else {
+      // safe to write
+      try {
+        localStorage.setItem("customMusic", dataUrl);
+        savedCustomMusic = dataUrl;
+      } catch (err) {
+        console.warn("Could not save music to localStorage (maybe quota). It will still play this session.", err);
+        savedCustomMusic = dataUrl; // keep in-memory
+      }
+      checkStorageUsage(false);
+      return true;
+    }
+  } catch (err) {
+    console.error("Error during attemptSaveCustomMusic:", err);
+    return false;
+  }
+}
+
+musicUploadInput.addEventListener("change", (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith("audio/")) {
+    showStorageModal("Invalid file", "Please upload an audio file (mp3, mpeg, etc.).");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const dataUrl = ev.target.result;
+    // Try to store safely
+    const saved = attemptSaveCustomMusic(dataUrl);
+    // Switch music in any case for the running session
+    try {
+      bgAudio.pause();
+      bgAudio.src = dataUrl;
+      bgAudio.load();
+      bgAudio.play().catch(()=>{});
+    } catch (err) {}
+    if (!saved) {
+      console.warn("Music was not saved to localStorage due to size constraints.");
+    }
+  };
+  reader.readAsDataURL(file);
+});
+
+/* Reset to default music (removes customMusic from localStorage) */
+resetMusicBtn.addEventListener("click", () => {
+  try { localStorage.removeItem("customMusic"); } catch (e){}
+  savedCustomMusic = null;
+  try {
+    bgAudio.pause();
+    bgAudio.src = defaultMusic;
+    bgAudio.load();
+    bgAudio.play().catch(()=>{});
+  } catch (err) {}
+  checkStorageUsage(false);
+});
+
+/* ---------- Background upload and theme saving (with checks) ---------- */
+let currentTheme = "galaxy";
+try { currentTheme = localStorage.getItem("theme") || currentTheme; } catch(e){}
+let uploadedBg = null;
+try { uploadedBg = localStorage.getItem("uploadedBg") || uploadedBg; } catch(e){}
+
+function setBackground(theme) {
+  const body = document.body;
+  body.classList.remove('galaxy','dark-red','navy','dark-orange','light-black','white','uploaded');
+  body.style.backgroundImage = "";
+  if (theme === "galaxy") body.classList.add("galaxy");
+  else if (theme === "uploaded" && uploadedBg) { body.classList.add("uploaded"); body.style.backgroundImage = `url(${uploadedBg})`; }
+  else if (theme !== "default") body.classList.add(theme);
+  currentTheme = theme;
+  try { localStorage.setItem("theme", theme); } catch (e) { console.warn("Could not save theme:", e); }
+}
+function loadBackground() {
+  try {
+    currentTheme = localStorage.getItem("theme") || currentTheme;
+    uploadedBg = localStorage.getItem("uploadedBg") || uploadedBg;
+    if (currentTheme === "uploaded" && uploadedBg) {
+      document.body.classList.add("uploaded");
+      document.body.style.backgroundImage = `url(${uploadedBg})`;
+    }
+    setBackground(currentTheme);
+  } catch (e) { console.warn("Error loading background:", e); }
+}
+
+backgroundButton.addEventListener('click', () => { backgroundModal.style.display = 'flex'; backgroundModal.setAttribute('aria-hidden','false'); });
+bgOptionButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    setBackground(btn.dataset.background);
+    backgroundModal.style.display = 'none';
+    backgroundModal.setAttribute('aria-hidden','true');
+    checkStorageUsage(false);
+  });
+});
+uploadBgBtn.addEventListener('click', () => { bgUploadInput.click(); });
+
+/* When user selects background file: convert and try to save, but check storage first */
+bgUploadInput.addEventListener('change', (e) => {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const img = new Image();
+    img.onload = function() {
+      // draw scaled image on canvas (downscale to reduce size)
+      const canvas = document.createElement("canvas");
+      const MAX_W = 1920;
+      const MAX_H = 900;
+      let w = img.width, h = img.height;
+      // preserve aspect ratio and constrain
+      if (w > MAX_W) {
+        h = Math.round(h * (MAX_W / w));
+        w = MAX_W;
+      }
+      if (h > MAX_H) {
+        w = Math.round(w * (MAX_H / h));
+        h = MAX_H;
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img,0,0,w,h);
+      // compress to jpeg with quality 0.8
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+
+      // Attempt to save to localStorage safely
+      try {
+        const currentBytes = getLocalStorageBytes();
+        const newEntryBytes = (("uploadedBg".length + (dataUrl ? dataUrl.length : 0)) * 2);
+        const estimatedTotalBytes = currentBytes + newEntryBytes;
+        const estimatedMB = bytesToMB(estimatedTotalBytes);
+
+        if (estimatedMB >= ALERT_MB) {
+          // cannot save
+          showStorageBanner('alert', estimatedMB);
+          showStorageModal("ALERT! You reached 25MB.", "ALERT! You reached 25MB. Saving this background would exceed 25MB, so it was not saved. Consider a smaller image or host it externally.");
+          // still set as session background
+          document.body.classList.add("uploaded");
+          document.body.style.backgroundImage = `url(${dataUrl})`;
+          uploadedBg = dataUrl; // session only
+          return;
+        } else {
+          // safe to write
+          localStorage.setItem("uploadedBg", dataUrl);
+          uploadedBg = dataUrl;
+          setBackground("uploaded");
+          backgroundModal.style.display = 'none';
+          backgroundModal.setAttribute('aria-hidden','true');
+          checkStorageUsage(false);
+        }
+      } catch (err) {
+        console.warn("Could not save uploaded background to localStorage (maybe quota). It will still be used this session.", err);
+        uploadedBg = dataUrl;
+        document.body.classList.add("uploaded");
+        document.body.style.backgroundImage = `url(${dataUrl})`;
+      }
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+/* ---------- Download export (with restore script) ---------- */
+downloadButton.addEventListener('click', () => {
+  // Insert restore script to restore theme and customMusic when opened locally
+  let htmlContent = document.documentElement.outerHTML;
+
+  const restoreScript = `<script>
+document.addEventListener("DOMContentLoaded", function() {
+  try {
+    const storedTheme = localStorage.getItem("theme");
+    const uploadedBg = localStorage.getItem("uploadedBg");
+    const customMusic = localStorage.getItem("customMusic");
+    if (storedTheme) {
+      const body = document.body;
+      body.classList.remove('galaxy','dark-red','navy','dark-orange','light-black','white','uploaded');
+      body.style.backgroundImage = "";
+      if (storedTheme === 'galaxy') body.classList.add('galaxy');
+      else if (storedTheme === 'uploaded' && uploadedBg) { body.classList.add('uploaded'); body.style.backgroundImage = "url(" + uploadedBg + ")"; }
+      else if (storedTheme !== 'default') body.classList.add(storedTheme);
+    }
+    var audioEl = document.getElementById('bgAudio');
+    if (audioEl) {
+      if (customMusic) {
+        audioEl.src = customMusic;
+      } else {
+        audioEl.src = "${defaultMusic}";
+      }
+      try { audioEl.play(); } catch(e) {}
+    }
+  } catch(e) { console.error(e); }
+});
+<\/script>`;
+
+  // Add restore script before </body>
+  htmlContent = htmlContent.replace("</body>", restoreScript + "</body>");
+
+  const blob = new Blob([htmlContent], {type: "text/html"});
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "GalaxyMenu++.html";
+  link.click();
+});
+
+/* ---------- Settings actions (restore / remove link) ---------- */
+settingsBtn.addEventListener('click', ()=>{ settingsModal.style.display = 'flex'; settingsModal.setAttribute('aria-hidden','false'); });
+
+restoreDataBtn.addEventListener('click', () => {
+  settingsModal.style.display = 'none';
+  settingsModal.setAttribute('aria-hidden','true');
+  loadingModal.style.display = 'flex';
+  loadingModal.setAttribute('aria-hidden','false');
+  setTimeout(()=> {
+    try { localStorage.clear(); } catch(e) {}
+    location.reload();
+  }, 2000);
+});
+
+removeLinkBtn.addEventListener('click', () => {
+  const container = document.getElementById('links-container');
+  const links = container.querySelectorAll('a');
+  if (links.length === 0) { showStorageModal("No buttons", "No buttons to remove!"); return; }
+  const names = Array.from(links).map(a => a.textContent.trim());
+  const name = prompt("Enter the exact button name to remove:\n" + names.join("\n"));
+  if (!name) return;
+  const target = Array.from(links).find(a => a.textContent.trim() === name);
+  if (target) {
+    target.remove();
+    showStorageModal("Removed", "Removed: " + name);
+  } else {
+    showStorageModal("Not found", "Button not found!");
+  }
+});
+
+/* ---------- Button sounds ---------- */
+function attachButtonSounds() {
+  document.querySelectorAll('button').forEach(btn => {
+    try {
+      // remove old handlers if any
+      if (btn._clickSoundHandler) btn.removeEventListener('click', btn._clickSoundHandler);
+      if (btn._hoverSoundHandler) btn.removeEventListener('mouseenter', btn._hoverSoundHandler);
+
+      btn._clickSoundHandler = ()=> { try { clickAudio.currentTime = 0; clickAudio.play(); } catch(e){} };
+      btn._hoverSoundHandler = ()=> { try { hoverAudio.currentTime = 0; hoverAudio.play(); } catch(e){} };
+
+      btn.addEventListener('click', btn._clickSoundHandler);
+      btn.addEventListener('mouseenter', btn._hoverSoundHandler);
+    } catch(e) { console.warn("Error attaching sound to button:", e); }
+  });
+}
+attachButtonSounds();
+
+/* ---------- Start screen and about ---------- */
+startMenuBtn.addEventListener('click', () => {
+  startScreen.style.display = 'none';
+  fullMenu.style.display = 'block';
+});
+
+aboutBtn.addEventListener('click', () => {
+  alert("Hi, my name is Goldenuser1, im in 8th grade and i do coding with AI cuz i dont know how to code. The reason i made this is because i got bored and decided to do something creative like.. making a game vault! I wanted you guys to have fun. Want some updates? Join my discord server (https://discord.gg/y7dMUneevU)");
+});
+
+/* ---------- Back button (returns to first menu) ---------- */
+backBtn.addEventListener('click', () => {
+  try {
+    fullMenu.style.display = 'none';
+    startScreen.style.display = 'flex';
+  } catch (e) {
+    console.warn("Error on Back button:", e);
+  }
+});
+
+/* ---------- Update notification (shows every load) ---------- */
+/* You can edit this message at runtime by changing updateMessage */
+const updateMessage = {
+  title: "GalaxyMenu++ Updated",
+  body: "six seven"
+};
+
+function showUpdateModal() {
+  // set text
+  updateBody.textContent = updateMessage.body;
+  // show modal
+  updateModal.style.display = 'flex';
+  updateModal.setAttribute('aria-hidden', 'false');
+}
+// close handlers
+updateOk.addEventListener('click', () => {
+  updateModal.style.display = 'none';
+  updateModal.setAttribute('aria-hidden', 'true');
+});
+updateClose.addEventListener('click', () => {
+  updateModal.style.display = 'none';
+  updateModal.setAttribute('aria-hidden', 'true');
+});
+
+/* Show update modal on every page load (no storage gating) */
+document.addEventListener('DOMContentLoaded', () => {
+  // show update modal (every load)
+  try {
+    showUpdateModal();
+  } catch(e){ console.warn("Could not show update modal:", e); }
+});
+
+/* ---------- Init ---------- */
+function initAll() {
+  // restore saved background image + theme
+  loadBackground();
+  // restore saved custom music (we loaded it earlier but ensure variable)
+  try { savedCustomMusic = savedCustomMusic || localStorage.getItem("customMusic") || null; } catch(e){}
+  try { loadInitialMusic(); } catch(e){}
+  attachButtonSounds();
+  // initial storage check (show banners/modals if needed)
+  checkStorageUsage(false);
+}
+initAll();
+
+/* ---------- scriptSentences (850 sentences) ----------
+   Instead of hardcoding 850 lines, we generate them programmatically
+   so the page stays readable and still has the full dataset available.
+   Each sentence is descriptive-ish but can be replaced with any content.
+*/
+const scriptSentences = Array.from({length: 850}, (_, i) => {
+  const n = i + 1;
+  // Create varied sentences using several templates for a bit of flavor
+  const templates = [
+    `GalaxyMenu++ sentence ${n}: quick note about features and styling.`,
+    `Tip ${n}: You can customize your background and music in settings.`,
+    `Notice ${n}: Save your preferences before downloading the local copy.`,
+    `Fun Fact ${n}: The starfield animates slowly for a relaxing effect.`,
+    `Log ${n}: User opened menu at ${new Date().toISOString().slice(0,19).replace('T',' ')}`,
+    `Message ${n}: Button sounds are attached to all interactive elements.`,
+    `Entry ${n}: Local storage size is measured approximately in MB.`,
+  ];
+  // pick one deterministically for a bit of variety
+  return templates[n % templates.length];
+});
+
+// Expose to window for future use (debugging or other features)
+window.scriptSentences = scriptSentences;
+
+// Example: use scriptSentences in some small way if you want:
+// console.log("Loaded", window.scriptSentences.length, "script sentences.");
+
+/* ---------- Done. The full page is ready ---------- */
+</script>
+</body>
+</html>
